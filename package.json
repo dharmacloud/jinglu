@@ -1,0 +1,33 @@
+{
+  "name": "jinglu",
+  "version": "1.0.0",
+  "description": "convet cbeta jinglu to modern format",
+  "main": "dump.js",
+  "type":"module",
+  "dependencies": {
+    "browserify-aes": "^1.2.0",
+    "buffer-xor": "^1.0.3",
+    "cipher-base": "^1.0.4",
+    "create-hash": "^1.2.0",
+    "evp_bytestokey": "^1.0.3",
+    "fast-xml-parser": "^4.1.3",
+    "hash-base": "^3.1.0",
+    "inherits": "^2.0.4",
+    "md5.js": "^1.3.5",
+    "mdb-reader": "^2.2.5",
+    "readable-stream": "^3.6.2",
+    "ripemd160": "^2.0.2",
+    "safe-buffer": "^5.2.1",
+    "sha.js": "^2.4.11",
+    "string_decoder": "^1.3.0",
+    "strnum": "^1.0.5",
+    "util-deprecate": "^1.0.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
