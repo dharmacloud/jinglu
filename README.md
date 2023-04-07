@@ -1,2 +1,2 @@
 # jinglu
-convet cbeta jinglu to modern format
+convet cbeta jinglu to open format
