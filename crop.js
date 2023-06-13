@@ -40,8 +40,8 @@ const dotask=async (pngbuf,frame,nth)=>{
     const [left,top,width,height] =frame;
 
     const opts={left,top,width,height};
-    //fix 450x1000
-    const outbuf=await buf.clone().extract(opts).resize(450,1000).jpeg({mozjpeg:true}).toBuffer();
+    //fix 450x1000, adjust ratio
+    const outbuf=await buf.clone().extract(opts).resize(720,1600,{fit:"fill"}).jpeg({mozjpeg:true}).toBuffer();
     const fn=tempdir+nth+'.jpg';
     writeChanged(fn,outbuf,false,'');//write binary buffer
     // prevfn=infn;
