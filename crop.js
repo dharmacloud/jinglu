@@ -3,12 +3,23 @@ import JSZip from 'jszip'
 import path from "node:path";
 import {exec} from 'child_process';
 await nodefs;
+
+const filerenames={
+    '0010a-001羽08':'vcpp_kumarajiva',
+    '0012-001翔03':'vcpp_gupta',
+    '0011b-001翔02':'vcpp_yijing',
+    '0011a-001翔01':'vcpp_xuanzhan',
+    '0010c-001羽10':'vcpp_paramartha',
+    '0010b-001羽09':'vcpp_bodhiruci'
+}
 const tempdir="A:/crop/"
 const deffile='./vcpp-yongle-versions/0010a-001羽08.zip'
+
+
 const input=process.argv[2]||deffile//'E:/yongle-bei-3400/11864611_14普門品/'
 let at2=input.lastIndexOf('/');
 if (at2==-1) at2=input.lastIndexOf('\\');
-const outfn=input.slice(at2+1).replace('.zip','');
+let outfn=input.slice(at2+1).replace('.zip','');
 
 import sharp  from "sharp";
 
@@ -79,7 +90,13 @@ JSZip.loadAsync(data).then(async function (zip) {
             dotask( png, frames[i],nth.toString().padStart(3,'0'));
         }        
     }
-
+    
+    for (let i in filerenames) {
+        if (~outfn.indexOf(i)) {
+            outfn=filerenames[i];
+            break
+        }
+    }
     
     const cmd='ffmpeg -r 1 -i '+tempdir+'%03d.jpg -crf 40 -b:v 0 '+outfn+'.webm';
     const cmd2='ffmpeg -r 1 -i '+tempdir+'/%03d.jpg -crf 40 -movflags +faststart '+outfn+'.mp4'
