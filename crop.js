@@ -80,9 +80,11 @@ JSZip.loadAsync(data).then(async function (zip) {
         }        
     }
 
-    const mp4filename=outfn+'.webm';
-    const cmd='ffmpeg -r 1 -i '+tempdir+'%03d.jpg -crf 40 -b:v 0 '+mp4filename;
+    
+    const cmd='ffmpeg -r 1 -i '+tempdir+'%03d.jpg -crf 40 -b:v 0 '+outfn+'.webm';
+    const cmd2='ffmpeg -r 1 -i '+tempdir+'/%03d.jpg -crf 40 -movflags +faststart '+outfn+'.mp4'
     console.log('exec command: ',cmd)
+    console.log('exec command: ',cmd2)
 //    await runCommand(cmd)
 
 });
