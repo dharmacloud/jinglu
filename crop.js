@@ -97,9 +97,9 @@ JSZip.loadAsync(data).then(async function (zip) {
             break
         }
     }
-    
-    const cmd='ffmpeg -r 1 -i '+tempdir+'%03d.jpg -crf 40 -b:v 0 '+outfn+'.webm';
-    const cmd2='ffmpeg -r 1 -i '+tempdir+'/%03d.jpg -crf 40 -movflags +faststart '+outfn+'.mp4'
+    // -g 1 create larget file, set min and max key frame interval
+    const cmd='ffmpeg -r 1 -i '+tempdir+'%03d.jpg -b:v 0 -crf 45 -keyint_min 1 -g 10 '+outfn+'.webm';
+    const cmd2='ffmpeg -r 1 -i '+tempdir+'%03d.jpg -crf 40  -x264opts keyint=1 -movflags +faststart '+outfn+'.mp4'
     console.log('exec command: ',cmd)
     console.log('exec command: ',cmd2)
 //    await runCommand(cmd)
