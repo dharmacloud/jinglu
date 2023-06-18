@@ -8,7 +8,7 @@ const filerenames={
     '0010a-001羽08':'vcpp_kumarajiva',
     '0012-001翔03':'vcpp_gupta',
     '0011b-001翔02':'vcpp_yijing',
-    '0011a-001翔01':'vcpp_xuanzhan',
+    '0011a-001翔01':'vcpp_xuanzang',
     '0010c-001羽10':'vcpp_paramartha',
     '0010b-001羽09':'vcpp_bodhiruci'
 }
@@ -39,7 +39,7 @@ const preparetempdir=()=>{
 }
 preparetempdir();
 
-const dotask=async (pngbuf,frame,nth)=>{
+const dotask=async (pngbuf,frame,nth,zipout)=>{
     const buf=await sharp(pngbuf)
     
     // console.log(buf)
@@ -52,11 +52,19 @@ const dotask=async (pngbuf,frame,nth)=>{
 
     const opts={left,top,width,height};
     //fix 450x1000, adjust ratio
-    const outbuf=await buf.clone().extract(opts).resize(720,1600,{fit:"fill"}).jpeg({mozjpeg:true}).toBuffer();
+    const quality=nth=='001'?50:15; //first page higher quality
+
+    const outbuf=await buf.clone().extract(opts).resize(720,1600,{fit:"fill"}).jpeg({quality,mozjpeg:true}).toBuffer();
     const fn=tempdir+nth+'.jpg';
-    writeChanged(fn,outbuf,false,'');//write binary buffer
-    // prevfn=infn;
+    if (zipout) {
+        zipout.file(nth+'.jpg',outbuf,{compression: "STORE"});
+    } else {
+        writeChanged(fn,outbuf,false,'');//write binary buffer
+    }
+    
 }
+
+
 
 const data=fs.readFileSync(input);
 async function runCommand(command) {
@@ -82,12 +90,14 @@ JSZip.loadAsync(data).then(async function (zip) {
         // await dotask(buf);
     }
     let nth=0;
+    const zipout=new JSZip();
     for (let i=0;i<tasks.length;i++) {
         const {name, frames} =tasks[i];
         const png=images[name];
+        process.stdout.write('\r'+(i+1)+'/'+tasks.length+'   ')
         for (let i=0;i<frames.length;i++) {
             nth++;
-            dotask( png, frames[i],nth.toString().padStart(3,'0'));
+            await dotask( png, frames[i],nth.toString().padStart(3,'0'),zipout);
         }        
     }
     
@@ -97,11 +107,22 @@ JSZip.loadAsync(data).then(async function (zip) {
             break
         }
     }
+
+
+    zipout.generateNodeStream({type:'nodebuffer',streamFiles:true,compression: "STORE"})
+    .pipe(fs.createWriteStream(outfn+'.zip'))
+    .on('finish', function () {
+         console.log('done output ',outfn+'.zip')
+    });
+
+
     // -g 1 create larget file, set min and max key frame interval
-    const cmd='ffmpeg -r 1 -i '+tempdir+'%03d.jpg -b:v 0 -crf 45 -keyint_min 1 -g 10 '+outfn+'.webm';
-    const cmd2='ffmpeg -r 1 -i '+tempdir+'%03d.jpg -crf 40  -x264opts keyint=1 -movflags +faststart '+outfn+'.mp4'
+    const cmd='ffmpeg -r 1 -i '+tempdir+'%03d.jpg -b:v 0 -crf 45 -keyint_min 1 -g 5 '+outfn+'.webm';
+    const cmd2='ffmpeg -r 1 -i '+tempdir+'%03d.jpg -b:v 512k -crf 40 -an  -x264opts keyint=1 -f mp4 -movflags +faststart -pix_fmt yuv420p -vf format=yuv420p -preset slow -profile:v main -level 3.0 '+outfn+'.mp4'
+
+    //const cmd='ffmpeg -r 1 -i '+tempdir+'%03d.jpg -x265-params "crf=40:keyint=1"  -an -c:v libx265 -vtag hvc1 -vprofile main  -f mp4 -movflags +faststart -pix_fmt yuv420p  '+outfn+'.mp4'
     console.log('exec command: ',cmd)
-    console.log('exec command: ',cmd2)
+     console.log('exec command: ',cmd2)
 //    await runCommand(cmd)
 
 });
