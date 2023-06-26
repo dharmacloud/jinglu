@@ -10,7 +10,11 @@ const filerenames={
     '0011b-001翔02':'vcpp_yijing',
     '0011a-001翔01':'vcpp_xuanzang',
     '0010c-001羽10':'vcpp_paramartha',
-    '0010b-001羽09':'vcpp_bodhiruci'
+    '0010b-001羽09':'vcpp_bodhiruci',
+
+    '0166-001惟01':'bhaisajya_gupta',
+    '0167-001惟02':'bhaisajya',
+    '0163-006恭06':'bhaisajya_srimitra',//from folio 20, chapter 12
 }
 const tempdir="A:/crop/"
 const deffile='./vcpp-yongle-versions/0010a-001羽08.zip'
