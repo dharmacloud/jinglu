@@ -15,12 +15,27 @@ const filerenames={
     '0166-001惟01':'bhaisajya_gupta',
     '0167-001惟02':'bhaisajya',
     '0163-006恭06':'bhaisajya_srimitra',//from folio 20, chapter 12
+ 
+    '0017-001翔08':'pph_xuanzang_kumarajiva',  //兩種略本 +10
+    '0929-001薄07':'pph',  //page 29 廣本，有梵文
+    '0133-001草10':'pumen',
+
+    //南藏
+    '11249711_39':'sdpdrk1',
+    '11249811_37':'sdpdrk2',
+    '11249911_36':'sdpdrk3',
+    '11250011_43':'sdpdrk4',
+    '11250111_40':'sdpdrk5',
+    '11250211_38':'sdpdrk6',
+    '11250311_34':'sdpdrk7',
+
 }
 const tempdir="A:/crop/"
 const deffile='./vcpp-yongle-versions/0010a-001羽08.zip'
 
 
 const input=process.argv[2]||deffile//'E:/yongle-bei-3400/11864611_14普門品/'
+const pageoffset=parseInt(process.argv[3]||'0'); 
 let at2=input.lastIndexOf('/');
 if (at2==-1) at2=input.lastIndexOf('\\');
 let outfn=input.slice(at2+1).replace('.zip','');
@@ -57,8 +72,12 @@ const dotask=async (pngbuf,frame,nth,zipout)=>{
     const opts={left,top,width,height};
     //fix 450x1000, adjust ratio
     const quality=nth=='001'?50:15; //first page higher quality
-
-    const outbuf=await buf.clone().extract(opts).resize(720,1600,{fit:"fill"}).jpeg({quality,mozjpeg:true}).toBuffer();
+    //const quality=50;
+    const W=720;
+    const H=1600;
+    const fit='fill';//contain'
+    const background={r:243, g:208, b:160};
+    const outbuf=await buf.clone().extract(opts).resize(W,H,{fit,background}).jpeg({quality,mozjpeg:true}).toBuffer();
     const fn=tempdir+nth+'.jpg';
     if (zipout) {
         zipout.file(nth+'.jpg',outbuf,{compression: "STORE"});
@@ -101,7 +120,7 @@ JSZip.loadAsync(data).then(async function (zip) {
         process.stdout.write('\r'+(i+1)+'/'+tasks.length+'   ')
         for (let i=0;i<frames.length;i++) {
             nth++;
-            await dotask( png, frames[i],nth.toString().padStart(3,'0'),zipout);
+            await dotask( png, frames[i],(nth+pageoffset).toString().padStart(3,'0'),zipout);
         }        
     }
     

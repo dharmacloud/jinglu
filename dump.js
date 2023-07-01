@@ -1,3 +1,4 @@
+/* 倒出 經錄 mdb */
 import {filesFromPattern,nodefs, writeChanged, readTextContent} from 'ptk/nodebundle.cjs'
 await nodefs;
 
