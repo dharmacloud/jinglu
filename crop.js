@@ -19,7 +19,8 @@ const filerenames={
     '0017-001翔08':'pph_xuanzang_kumarajiva',  //兩種略本 +10
     '0929-001薄07':'pph',  //page 29 廣本，有梵文
     '0133-001草10':'pumen',
-
+    '0121-001食10':'lastwords',
+    '0658-001慶10':'falun',
     //南藏
     '11249711_39':'sdpdrk1',
     '11249811_37':'sdpdrk2',
