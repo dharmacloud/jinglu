@@ -1,3 +1,4 @@
+import sharp  from "sharp";
 import {filesFromPattern,nodefs, writeChanged, readTextContent, readTextLines} from 'ptk/nodebundle.cjs'
 import JSZip from 'jszip'
 import path from "node:path";
@@ -21,14 +22,31 @@ const filerenames={
     '0133-001草10':'pumen',
     '0121-001食10':'lastwords',
     '0658-001慶10':'falun',
+
+    //無量壽經 
+    '0020-017師07':'amtb1_ruci', //大寶積經無量壽如來會
+    '0020-018師08':'amtb2_ruci',
+    '0022-001乃04':'amtb1_ls',　//支婁迦讖
+    '0022-002乃05':'amtb2_ls',
+    '0022-003乃06':'amtb3_ls',
+    '0023-001乃07':'amtb1_zq',  //《阿彌陀三耶三佛薩樓佛檀過度人道經》 支謙
+    '0023-002乃08':'amtb2_zq',
+    '0024-001乃09':'amtb1_sv', //康僧鎧
+    '0024-002乃10':'amtb2_sv',
+    '0857-001命10':'amtb_fx', //法賢 大乘無量壽莊嚴經
+    
     //南藏
-    '11249711_39':'sdpdrk1',
+    '11249711_39':'sdpdrk1', //法華經
     '11249811_37':'sdpdrk2',
     '11249911_36':'sdpdrk3',
     '11250011_43':'sdpdrk4',
     '11250111_40':'sdpdrk5',
     '11250211_38':'sdpdrk6',
     '11250311_34':'sdpdrk7',
+
+
+    '11275811_29':'amtb_kalam',//佛說觀無量壽佛經
+    '11275911_28':'amtb', //小阿彌陀兩版 two version  http://www.minlun.org.tw/2pt/2pt-1-7/01.htm
 
 }
 const tempdir="A:/crop/"
@@ -41,7 +59,7 @@ let at2=input.lastIndexOf('/');
 if (at2==-1) at2=input.lastIndexOf('\\');
 let outfn=input.slice(at2+1).replace('.zip','');
 
-import sharp  from "sharp";
+
 
 let  cropfile=input.replace('.zip','')+'.json';
 
@@ -59,9 +77,7 @@ const preparetempdir=()=>{
 }
 preparetempdir();
 
-const dotask=async (pngbuf,frame,nth,zipout)=>{
-    const buf=await sharp(pngbuf)
-    
+const dotask=async (buf,frame,nth,adjx,adjy,zipout)=>{  
     // console.log(buf)
 
     // const [buf, outfn, x,y,w,h]=t;
@@ -69,8 +85,9 @@ const dotask=async (pngbuf,frame,nth,zipout)=>{
     //     buf=await sharp(buf);
     // }
     const [left,top,width,height] =frame;
-
-    const opts={left,top,width,height};
+    
+    const opts={left:left+adjx,top:top+adjy,width,height};
+    console.log(opts)
     //fix 450x1000, adjust ratio
     const quality=nth=='001'?50:15; //first page higher quality
     //const quality=50;
@@ -78,6 +95,7 @@ const dotask=async (pngbuf,frame,nth,zipout)=>{
     const H=1600;
     const fit='fill';//contain'
     const background={r:243, g:208, b:160};
+    
     const outbuf=await buf.clone().extract(opts).resize(W,H,{fit,background}).jpeg({quality,mozjpeg:true}).toBuffer();
     const fn=tempdir+nth+'.jpg';
     if (zipout) {
@@ -86,6 +104,7 @@ const dotask=async (pngbuf,frame,nth,zipout)=>{
         writeChanged(fn,outbuf,false,'');//write binary buffer
     }
     
+
 }
 
 
@@ -115,14 +134,26 @@ JSZip.loadAsync(data).then(async function (zip) {
     }
     let nth=0;
     const zipout=new JSZip();
+    let extracted=null;
     for (let i=0;i<tasks.length;i++) {
-        const {name, frames} =tasks[i];
+        const {name, frames,rotate} =tasks[i];
         const png=images[name];
         process.stdout.write('\r'+(i+1)+'/'+tasks.length+'   ')
+        
+        const buf=sharp(png);
+        let adjy=0,adjx=0;
+        if (rotate) {
+            const angle=rotate/60; //60分之一
+            const meta=await buf.metadata()
+            const width=meta.width, height=meta.height;
+            buf.rotate(angle);
+            adjx = Math.round(0.5*Math.abs(width * Math.sin(rotate*Math.PI/(180*60))));//多出來的高
+            adjy  = Math.round(0.5*Math.abs(height * Math.sin(rotate*Math.PI/(180*60))));//多出來的寬
+        }
         for (let i=0;i<frames.length;i++) {
             nth++;
-            await dotask( png, frames[i],(nth+pageoffset).toString().padStart(3,'0'),zipout);
-        }        
+            await dotask(buf, frames[i],(nth+pageoffset).toString().padStart(3,'0'),adjx,adjy,zipout);
+        }
     }
     
     for (let i in filerenames) {
