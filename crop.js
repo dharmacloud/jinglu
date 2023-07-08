@@ -46,22 +46,31 @@ const filerenames={
 
 
     '11275811_29':'amtb_kalam',//佛說觀無量壽佛經
-    '11275911_28':'amtb', //小阿彌陀兩版 two version  http://www.minlun.org.tw/2pt/2pt-1-7/01.htm
+    '11275911_28':'amtb_xuanzang', 
+    //小阿彌陀兩版 two version  http://www.minlun.org.tw/2pt/2pt-1-7/01.htm
+    //folio 16 , 46.jpg 什譯阿彌陀經
 
 }
 const tempdir="A:/crop/"
 const deffile='./vcpp-yongle-versions/0010a-001羽08.zip'
 
 
-const input=process.argv[2]||deffile//'E:/yongle-bei-3400/11864611_14普門品/'
+let input=(process.argv[2]||deffile).replace('.json','.zip')//'E:/yongle-bei-3400/11864611_14普門品/'
+let named=false;//name specified in json filename
 const pageoffset=parseInt(process.argv[3]||'0'); 
 let at2=input.lastIndexOf('/');
 if (at2==-1) at2=input.lastIndexOf('\\');
 let outfn=input.slice(at2+1).replace('.zip','');
 
 
-
 let  cropfile=input.replace('.zip','')+'.json';
+const at=input.indexOf('-');//json specific name
+if (~at) {
+    outfn=input.match(/\-([^\.]+)/)[1]
+    input=input.replace(/\-[^\.]+/,'');
+    named=true;
+}
+
 
 const tasks=JSON.parse(readTextContent(cropfile));
 
@@ -87,7 +96,6 @@ const dotask=async (buf,frame,nth,adjx,adjy,zipout)=>{
     const [left,top,width,height] =frame;
     
     const opts={left:left+adjx,top:top+adjy,width,height};
-    console.log(opts)
     //fix 450x1000, adjust ratio
     const quality=nth=='001'?50:15; //first page higher quality
     //const quality=50;
@@ -103,8 +111,6 @@ const dotask=async (buf,frame,nth,adjx,adjy,zipout)=>{
     } else {
         writeChanged(fn,outbuf,false,'');//write binary buffer
     }
-    
-
 }
 
 
@@ -156,11 +162,15 @@ JSZip.loadAsync(data).then(async function (zip) {
         }
     }
     
-    for (let i in filerenames) {
-        if (~outfn.indexOf(i)) {
-            outfn=filerenames[i];
-            break
-        }
+
+
+    if (!named){
+        for (let i in filerenames) {
+            if (~outfn.indexOf(i)) {
+                outfn=filerenames[i];
+                break
+            }
+        }    
     }
 
 
