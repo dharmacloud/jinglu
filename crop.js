@@ -1,5 +1,5 @@
 import sharp  from "sharp";
-import {filesFromPattern,nodefs, writeChanged, readTextContent, readTextLines} from 'ptk/nodebundle.cjs'
+import {nodefs, writeChanged, readTextContent, readTextLines} from 'ptk/nodebundle.cjs'
 import JSZip from 'jszip'
 import path from "node:path";
 import {exec} from 'child_process';
@@ -22,19 +22,25 @@ const filerenames={
     '0133-001草10':'pumen',
     '0121-001食10':'lastwords',
     '0658-001慶10':'falun',
+    '0997-001斯09':'ksitigarbha1',
+    '0997-002斯10':'ksitigarbha2',
 
+    '1650-031扶01':'platform',
+    //http://faculty.stust.edu.tw/~tang/shallow/best_sutra.htm
     //無量壽經 
-    '0020-017師07':'amtb1_ruci', //大寶積經無量壽如來會
-    '0020-018師08':'amtb2_ruci',
-    '0022-001乃04':'amtb1_ls',　//支婁迦讖
-    '0022-002乃05':'amtb2_ls',
-    '0022-003乃06':'amtb3_ls',
-    '0023-001乃07':'amtb1_zq',  //《阿彌陀三耶三佛薩樓佛檀過度人道經》 支謙
-    '0023-002乃08':'amtb2_zq',
-    '0024-001乃09':'amtb1_sv', //康僧鎧
-    '0024-002乃10':'amtb2_sv',
-    '0857-001命10':'amtb_fx', //法賢 大乘無量壽莊嚴經
+    '0020-017師07':'svv1_ruci', //大寶積經無量壽如來會
+    '0020-018師08':'svv2_ruci',
+    '0022-001乃04':'svv1_ls',　//支婁迦讖
+    '0022-002乃05':'svv2_ls',
+    '0022-003乃06':'svv3_ls',
+    '0023-001乃07':'svv1_zq',  //《阿彌陀三耶三佛薩樓佛檀過度人道經》 支謙
+    '0023-002乃08':'svv2_zq',
+    '0024-001乃09':'svv1_sv', //康僧鎧
+    '0024-002乃10':'svv2_sv',
+    '0857-001命10':'svv_fx', //法賢 大乘無量壽莊嚴經
     
+    '0121-001食10':'lastword',//佛垂般涅槃畧說教誡經
+
     //南藏
     '11249711_39':'sdpdrk1', //法華經
     '11249811_37':'sdpdrk2',
@@ -45,8 +51,13 @@ const filerenames={
     '11250311_34':'sdpdrk7',
 
 
-    '11275811_29':'amtb_kalam',//佛說觀無量壽佛經
+    
+    
+    '11275811_29':'amty_kalam',//佛說觀無量壽佛經
     '11275911_28':'amtb_xuanzang', 
+
+    '11276611_30':'amtb_', //會集本 大阿彌陀經
+    '11276711_41':'amtb_',
     //小阿彌陀兩版 two version  http://www.minlun.org.tw/2pt/2pt-1-7/01.htm
     //folio 16 , 46.jpg 什譯阿彌陀經
 
@@ -65,7 +76,7 @@ let outfn=input.slice(at2+1).replace('.zip','');
 
 let  cropfile=input.replace('.zip','')+'.json';
 const at=input.indexOf('-');//json specific name
-if (~at) {
+if (~at && input.match(/\-[a-z]/)) {
     outfn=input.match(/\-([^\.]+)/)[1]
     input=input.replace(/\-[^\.]+/,'');
     named=true;
