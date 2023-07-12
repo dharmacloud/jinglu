@@ -35,8 +35,8 @@ const filerenames={
     '0022-003乃06':'svv3_ls',
     '0023-001乃07':'svv1_zq',  //《阿彌陀三耶三佛薩樓佛檀過度人道經》 支謙
     '0023-002乃08':'svv2_zq',
-    '0024-001乃09':'svv1_sv', //康僧鎧
-    '0024-002乃10':'svv2_sv',
+    '0024-001乃09':'svv1', //康僧鎧 v  , 補上三頁為黑白
+    '0024-002乃10':'svv2',
     '0857-001命10':'svv_fx', //法賢 大乘無量壽莊嚴經
     
     '0121-001食10':'lastword',//佛垂般涅槃畧說教誡經
@@ -48,10 +48,7 @@ const filerenames={
     '11250011_43':'sdpdrk4',
     '11250111_40':'sdpdrk5',
     '11250211_38':'sdpdrk6',
-    '11250311_34':'sdpdrk7',
-
-
-    
+    '11250311_34':'sdpdrk7', 
     
     '11275811_29':'amty_kalam',//佛說觀無量壽佛經
     '11275911_28':'amtb_xuanzang', 
@@ -60,7 +57,9 @@ const filerenames={
     '11276711_41':'amtb_',
     //小阿彌陀兩版 two version  http://www.minlun.org.tw/2pt/2pt-1-7/01.htm
     //folio 16 , 46.jpg 什譯阿彌陀經
-
+}
+const allinserts={
+    'svv1':{73:['svv1-073.jpg','svv1-074.jpg','svv1-075.jpg']}
 }
 const tempdir="A:/crop/"
 const deffile='./vcpp-yongle-versions/0010a-001羽08.zip'
@@ -97,6 +96,17 @@ const preparetempdir=()=>{
 }
 preparetempdir();
 
+const W=720;
+const H=1600;
+const fit='fill';//contain'
+const background={r:243, g:208, b:160};
+
+const insertimage=async (img,nth,zipout)=>{
+    const fn=path.dirname(input)+'/'+img;
+    const buf=new sharp(fn);
+    const outbuf=await buf.clone().resize(W,H,{fit}).jpeg({quality:30,mozjpeg:true}).toBuffer();
+    zipout.file(nth+'.jpg',outbuf,{compression: "STORE"});
+}
 const dotask=async (buf,frame,nth,adjx,adjy,zipout)=>{  
     // console.log(buf)
 
@@ -110,10 +120,7 @@ const dotask=async (buf,frame,nth,adjx,adjy,zipout)=>{
     //fix 450x1000, adjust ratio
     const quality=nth=='001'?50:15; //first page higher quality
     //const quality=50;
-    const W=720;
-    const H=1600;
-    const fit='fill';//contain'
-    const background={r:243, g:208, b:160};
+
     
     const outbuf=await buf.clone().extract(opts).resize(W,H,{fit,background}).jpeg({quality,mozjpeg:true}).toBuffer();
     const fn=tempdir+nth+'.jpg';
@@ -152,6 +159,18 @@ JSZip.loadAsync(data).then(async function (zip) {
     let nth=0;
     const zipout=new JSZip();
     let extracted=null;
+
+    if (!named){
+        for (let i in filerenames) {
+            if (~outfn.indexOf(i)) {
+                outfn=filerenames[i];
+                break
+            }
+        }    
+    }
+
+    const inserts=allinserts[outfn];
+    let insertcount=0;
     for (let i=0;i<tasks.length;i++) {
         const {name, frames,rotate} =tasks[i];
         const png=images[name];
@@ -169,19 +188,15 @@ JSZip.loadAsync(data).then(async function (zip) {
         }
         for (let i=0;i<frames.length;i++) {
             nth++;
-            await dotask(buf, frames[i],(nth+pageoffset).toString().padStart(3,'0'),adjx,adjy,zipout);
-        }
-    }
-    
-
-
-    if (!named){
-        for (let i in filerenames) {
-            if (~outfn.indexOf(i)) {
-                outfn=filerenames[i];
-                break
+            if (inserts&&inserts[nth]) {
+                for (let j=0;j<inserts[nth].length;j++) {
+                    await insertimage( inserts[nth][j],(nth+pageoffset+insertcount).toString().padStart(3,'0'), zipout);
+                    insertcount++;
+                }
             }
-        }    
+            
+            await dotask(buf, frames[i],(nth+insertcount+pageoffset).toString().padStart(3,'0'),adjx,adjy,zipout);
+        }
     }
 
 
