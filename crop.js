@@ -50,11 +50,11 @@ const filerenames={
     '11250211_38':'sdpdrk6',
     '11250311_34':'sdpdrk7', 
     
-    '11275811_29':'amty_kalam',//佛說觀無量壽佛經
+    '11275811_29':'svvy',//佛說觀無量壽佛經
     '11275911_28':'amtb_xuanzang', 
 
-    '11276611_30':'amtb_', //會集本 大阿彌陀經
-    '11276711_41':'amtb_',
+    '11276611_30':'svv1_wang', //會集本 大阿彌陀經 王日休
+    '11276711_41':'svv2_wang',
     //小阿彌陀兩版 two version  http://www.minlun.org.tw/2pt/2pt-1-7/01.htm
     //folio 16 , 46.jpg 什譯阿彌陀經
 }
